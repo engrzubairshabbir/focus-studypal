@@ -925,6 +925,45 @@
                         </div>
                     </div>
                 </div>
+
+        <!-- FIREBASE CLOUD SYNC HEALTH & STATUS BANNER -->
+        <div id="firebaseHealthCard" style="background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 24px;">🔥</span>
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+                            <span>Firebase Cloud Sync Engine:</span>
+                            <span id="firebaseStatusPill" style="padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; background: rgba(251, 191, 36, 0.2); color: #FBBF24;">Checking Connection...</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-dim); margin-top: 3px;">
+                            Database REST URL: <span class="mono" id="currentDbUrlDisplay" style="color: #38BDF8;">https://consult-ways-default-rtdb.firebaseio.com</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-ctrl" onclick="pingFirebaseDb()">⚡ Ping Cloud</button>
+                    <a href="https://console.firebase.google.com/project/consult-ways/database" target="_blank" class="btn-ctrl" style="background: #2563EB; color: #fff; text-decoration: none;">
+                        Open Firebase Console ➔
+                    </a>
+                </div>
+            </div>
+
+            <!-- Setup Alert Banner (Shown if Firebase RTDB is 404 / Not Created yet) -->
+            <div id="firebaseNotCreatedBanner" style="display: none; margin-top: 14px; background: rgba(239, 68, 68, 0.12); border: 1px solid #EF4444; border-radius: 10px; padding: 14px;">
+                <strong style="color: #FCA5A5; font-size: 13px;">⚠️ Realtime Database abhi Firebase Console me create nahi hua (Error 404):</strong>
+                <p style="font-size: 12px; color: #E0E0E0; margin-top: 4px; line-height: 1.5;">
+                    Is waja se Mobile App aur Admin Dashboard aapas me connect nahi ho pa rahe. Isko theek karne ka sirf 20 seconds ka aik simple step hai:
+                    <br>
+                    1. <a href="https://console.firebase.google.com/project/consult-ways/database" target="_blank" style="color: #38BDF8; font-weight: bold; text-decoration: underline;">Yahan click karein aur Firebase Console kholen ➔</a><br>
+                    2. <strong>"Create Database"</strong> button par click karein.<br>
+                    3. Location: <strong>United States (us-central1)</strong> rehne dein aur Next karein.<br>
+                    4. Security Rules: <strong>"Start in test mode"</strong> select kar ke <strong>Enable</strong> kar dein.<br>
+                    Jaise hi aap Enable karenge, app aur dashboard ka cloud link 100% active ho jayega!
+                </p>
+            </div>
+        </div>
+
         <!-- SECTION 1: PENDING PAYMENT VERIFICATIONS & DEVICE ACTIVATOR -->
         <div class="chart-box" style="margin-bottom: 24px;">
             <div class="chart-header">
@@ -1305,52 +1344,80 @@
         }
 
         // --- Cloud Payment Claims & Remote Device Activation Logic ---
-        const FIREBASE_RTDB_BASE = "https://consult-ways-default-rtdb.firebaseio.com";
-
-        // Initial sample data if cloud has not received requests yet
-        let localClaims = [
-            {
-                deviceId: "SP-7A9B-4C3D",
-                planName: "Pro Scholar ($9.99/mo)",
-                amount: 9.99,
-                userEmail: "student.focus@gmail.com",
-                transactionRef: "POLAR_TX_892147",
-                receiptImageBase64: null,
-                timestamp: Date.now() - 3600000,
-                status: "PENDING"
-            }
+        const CANDIDATE_RTDB_URLS = [
+            "https://consult-ways-default-rtdb.firebaseio.com",
+            "https://consult-ways.firebaseio.com",
+            "https://consult-ways-default-rtdb.asia-southeast1.firebasedatabase.app",
+            "https://consult-ways-default-rtdb.europe-west1.firebasedatabase.app"
         ];
+        let FIREBASE_RTDB_BASE = localStorage.getItem('sp_firebase_rtdb_url') || CANDIDATE_RTDB_URLS[0];
 
-        let localTickets = [
-            {
-                ticketId: "TKT-849102",
-                deviceId: "SP-7A9B-4C3D",
-                userEmail: "student.focus@gmail.com",
-                message: "Hello Maryam Fatima! The Pomodoro ambient rain soundscape has really helped me focus for my exam preparations. Could you please add a custom timer option for 45 minutes? Thank you so much for this app!",
-                timestamp: Date.now() - 5400000,
-                screenshots: []
+        async function pingFirebaseDb() {
+            const pill = document.getElementById('firebaseStatusPill');
+            const banner = document.getElementById('firebaseNotCreatedBanner');
+            const urlDisplay = document.getElementById('currentDbUrlDisplay');
+            if (pill) {
+                pill.style.background = 'rgba(251, 191, 36, 0.2)';
+                pill.style.color = '#FBBF24';
+                pill.innerText = 'Pinging Cloud...';
             }
-        ];
+
+            // Test candidate endpoints
+            const urlsToTest = [FIREBASE_RTDB_BASE, ...CANDIDATE_RTDB_URLS.filter(u => u !== FIREBASE_RTDB_BASE)];
+            for (const candidate of urlsToTest) {
+                try {
+                    const res = await fetch(`${candidate}/.json?shallow=true`);
+                    if (res.ok) {
+                        FIREBASE_RTDB_BASE = candidate;
+                        localStorage.setItem('sp_firebase_rtdb_url', candidate);
+                        if (urlDisplay) urlDisplay.innerText = candidate;
+                        if (pill) {
+                            pill.style.background = 'rgba(74, 222, 128, 0.2)';
+                            pill.style.color = '#4ADE80';
+                            pill.innerText = '🟢 Connected & Live';
+                        }
+                        if (banner) banner.style.display = 'none';
+                        return true;
+                    }
+                } catch (e) {}
+            }
+
+            // If none responded with 200 OK
+            if (pill) {
+                pill.style.background = 'rgba(239, 68, 68, 0.2)';
+                pill.style.color = '#EF4444';
+                pill.innerText = 'Database Not Found (404)';
+            }
+            if (banner) banner.style.display = 'block';
+            return false;
+        }
 
         async function loadPaymentClaims() {
             const tbody = document.getElementById('claimsTableBody');
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">Fetching live claims from cloud...</td></tr>`;
 
+            const isDbAlive = await pingFirebaseDb();
+
             try {
                 const res = await fetch(`${FIREBASE_RTDB_BASE}/payment_claims.json`);
+                if (res.status === 404) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#FCA5A5; padding:20px;">
+                        ⚠️ Firebase Realtime Database abhi activate nahi hua (404 Not Found).<br>
+                        Upar diye gaye blue button "Open Firebase Console" par click karein aur Realtime Database create karein.
+                    </td></tr>`;
+                    return;
+                }
+
                 const data = await res.json();
                 let claims = [];
 
-                if (data && typeof data === 'object') {
-                    claims = Object.values(data);
-                }
-                if (claims.length === 0) {
-                    claims = localClaims;
+                if (data && typeof data === 'object' && !data.error) {
+                    claims = Object.values(data).filter(item => item && typeof item === 'object' && item.deviceId);
                 }
 
                 renderClaimsTable(claims);
             } catch (err) {
-                renderClaimsTable(localClaims);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">No pending payment verifications found.</td></tr>`;
             }
         }
 
@@ -1362,7 +1429,7 @@
             }
 
             tbody.innerHTML = claims.map(c => {
-                const dateStr = new Date(c.timestamp).toLocaleString();
+                const dateStr = new Date(c.timestamp || Date.now()).toLocaleString();
                 const screenshotHtml = c.receiptImageBase64 
                     ? `<img src="data:image/jpeg;base64,${c.receiptImageBase64}" onclick="previewImage(this.src)" style="width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid var(--border); cursor:pointer;" title="Click to enlarge">`
                     : `<span style="font-size:11px; color:var(--text-dim);">No screenshot</span>`;
@@ -1371,9 +1438,9 @@
 
                 return `
                     <tr id="row-${c.deviceId}">
-                        <td><strong class="mono" style="color:var(--accent-gold);">${c.deviceId}</strong><br><small style="color:var(--text-dim); font-size:10px;">${dateStr}</small></td>
-                        <td>${c.planName}</td>
-                        <td><strong>${c.transactionRef}</strong><br><small style="color:var(--text-dim);">${c.userEmail || 'No email'}</small></td>
+                        <td><strong class="mono" style="color:var(--accent-gold);">${c.deviceId || 'Unknown Device'}</strong><br><small style="color:var(--text-dim); font-size:10px;">${dateStr}</small></td>
+                        <td>${c.planName || 'Pro Scholar ($9.99)'}</td>
+                        <td><strong>${c.transactionRef || 'Ref Pending'}</strong><br><small style="color:var(--text-dim);">${c.userEmail || 'No email'}</small></td>
                         <td>${screenshotHtml}</td>
                         <td>
                             <select id="duration-${c.deviceId}" class="looker-input" style="padding:4px 8px; font-size:12px; width:130px;">
@@ -1386,7 +1453,7 @@
                         <td>
                             ${isApproved 
                                 ? `<span class="stream-tag tag-paid">ACTIVATED ✅</span>` 
-                                : `<button class="btn-ctrl" onclick="activateDevice('${c.deviceId}', '${c.planName}', ${c.amount})" style="background:var(--primary); color:#fff; padding:6px 12px; font-size:12px;">✅ Activate</button>`
+                                : `<button class="btn-ctrl" onclick="activateDevice('${c.deviceId}', '${c.planName || 'VIP'}', ${c.amount || 9.99})" style="background:var(--primary); color:#fff; padding:6px 12px; font-size:12px;">✅ Activate</button>`
                             }
                         </td>
                     </tr>
@@ -1394,9 +1461,14 @@
             }).join('');
         }
 
-        async function activateDevice(deviceId, planName = "Pro Scholar", amount = 9.99) {
-            const durationEl = document.getElementById(`duration-${deviceId}`);
-            const duration = durationEl ? parseInt(durationEl.value) : 9999;
+        async function activateDevice(deviceId, planName = "Pro Scholar", amount = 9.99, customDuration = null) {
+            let duration = 9999;
+            if (customDuration !== null) {
+                duration = customDuration;
+            } else {
+                const durationEl = document.getElementById(`duration-${deviceId}`);
+                if (durationEl) duration = parseInt(durationEl.value);
+            }
 
             const payload = {
                 deviceId: deviceId,
@@ -1410,11 +1482,17 @@
             showToast(`Activating device ${deviceId}...`, "⏳");
 
             try {
-                await fetch(`${FIREBASE_RTDB_BASE}/device_activations/${deviceId}.json`, {
+                const res = await fetch(`${FIREBASE_RTDB_BASE}/device_activations/${deviceId}.json`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
+                if (res.status === 404) {
+                    showToast("Error: Firebase Realtime Database abhi create nahi hua (404).", "❌");
+                    pingFirebaseDb();
+                    return;
+                }
 
                 // Update claim status
                 await fetch(`${FIREBASE_RTDB_BASE}/payment_claims/${deviceId}/status.json`, {
@@ -1426,9 +1504,7 @@
                 showToast(`Device ${deviceId} activated! Auto-unlocked on user's phone.`, "🎉");
                 loadPaymentClaims();
             } catch (err) {
-                showToast(`Activated locally for ${deviceId}! Syncing...`, "✅");
-                const row = document.getElementById(`row-${deviceId}`);
-                if (row) row.style.opacity = '0.5';
+                showToast(`Network error communicating with Firebase for ${deviceId}`, "❌");
             }
         }
 
@@ -1440,7 +1516,7 @@
                 return;
             }
             const duration = parseInt(document.getElementById('manualDurationSelect').value);
-            await activateDevice(deviceId, "Manual Activation VIP", 9.99);
+            await activateDevice(deviceId, "Manual Activation VIP", 9.99, duration);
             input.value = "";
         }
 
@@ -1451,34 +1527,45 @@
 
             try {
                 const res = await fetch(`${FIREBASE_RTDB_BASE}/feedback_tickets.json`);
+                if (res.status === 404) {
+                    listEl.innerHTML = `<div style="text-align:center; color:#FCA5A5; padding:20px;">
+                        ⚠️ Realtime Database abhi activate nahi hua (404 Not Found).<br>
+                        Firebase console par ja kar Realtime Database create karein taake feedback sync ho sakay.
+                    </div>`;
+                    return;
+                }
+
                 const data = await res.json();
                 let tickets = [];
 
-                if (data && typeof data === 'object') {
+                if (data && typeof data === 'object' && !data.error) {
                     Object.values(data).forEach(deviceGroup => {
-                        if (typeof deviceGroup === 'object') {
-                            Object.values(deviceGroup).forEach(t => tickets.push(t));
+                        if (deviceGroup && typeof deviceGroup === 'object') {
+                            Object.values(deviceGroup).forEach(t => {
+                                if (t && typeof t === 'object' && t.message) {
+                                    tickets.push(t);
+                                }
+                            });
                         }
                     });
                 }
 
-                if (tickets.length === 0) tickets = localTickets;
                 renderFeedbackTickets(tickets);
             } catch (err) {
-                renderFeedbackTickets(localTickets);
+                listEl.innerHTML = `<div style="text-align:center; color:var(--text-dim); padding:20px;">No student feedback tickets yet.</div>`;
             }
         }
 
         function renderFeedbackTickets(tickets) {
             const listEl = document.getElementById('feedbackTicketsList');
             if (!tickets || tickets.length === 0) {
-                listEl.innerHTML = `<div style="text-align:center; color:var(--text-dim); padding:20px;">No student feedback tickets yet.</div>`;
+                listEl.innerHTML = `<div style="text-align:center; color:var(--text-dim); padding:20px;">No student feedback tickets at this time.</div>`;
                 return;
             }
 
             listEl.innerHTML = tickets.map(t => {
-                const dateStr = new Date(t.timestamp).toLocaleString();
-                const screenshotsHtml = (t.screenshots && t.screenshots.length > 0)
+                const dateStr = new Date(t.timestamp || Date.now()).toLocaleString();
+                const screenshotsHtml = (t.screenshots && Array.isArray(t.screenshots) && t.screenshots.length > 0)
                     ? `<div style="display:flex; gap:8px; margin:10px 0;">
                         ${t.screenshots.map(s => `<img src="data:image/jpeg;base64,${s}" onclick="previewImage(this.src)" style="width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid var(--border); cursor:pointer;">`).join('')}
                        </div>`
@@ -1489,12 +1576,12 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
                             <div>
                                 <strong style="color:#fff; font-size:14px;">Ticket: ${t.ticketId || 'Feedback'}</strong>
-                                <span class="mono" style="color:var(--accent-gold); font-size:12px; margin-left:8px;">${t.deviceId}</span>
+                                <span class="mono" style="color:var(--accent-gold); font-size:12px; margin-left:8px;">${t.deviceId || ''}</span>
                             </div>
                             <span style="font-size:11px; color:var(--text-dim);">${dateStr}</span>
                         </div>
                         <p style="font-size:13px; color:#E0E0E0; line-height:1.6; background:rgba(0,0,0,0.25); padding:12px; border-radius:8px; border-left:3px solid var(--primary-light);">
-                            ${t.message}
+                            ${t.message || ''}
                         </p>
                         ${screenshotsHtml}
                         <div style="display:flex; gap:8px; margin-top:12px;">
@@ -1525,17 +1612,22 @@
             showToast("Sending reply to student device...", "⏳");
 
             try {
-                await fetch(`${FIREBASE_RTDB_BASE}/feedback_replies/${deviceId}/${replyId}.json`, {
+                const res = await fetch(`${FIREBASE_RTDB_BASE}/feedback_replies/${deviceId}/${replyId}.json`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
+                if (res.status === 404) {
+                    showToast("Error: Firebase Realtime Database abhi activate nahi hua (404).", "❌");
+                    pingFirebaseDb();
+                    return;
+                }
+
                 showToast("Reply delivered! Student will receive phone notification 🔔", "✨");
                 input.value = "";
             } catch (err) {
-                showToast("Reply queued for student! Synced.", "✅");
-                input.value = "";
+                showToast("Could not send reply to Firebase.", "❌");
             }
         }
 
