@@ -1052,6 +1052,20 @@
         let funnelChartInstance = null;
         let countryChartInstance = null;
 
+        function showToast(message, icon = "ℹ️") {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toastMsg');
+            const iconEl = document.getElementById('toastIcon');
+            if (!toast) return;
+            if (msgEl) msgEl.innerText = message;
+            if (iconEl) iconEl.innerText = icon;
+            toast.classList.add('show');
+            clearTimeout(window._toastTimeout);
+            window._toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
         // Dataset presets
         const TELEMETRY_DATA = {
             yesterday: {
@@ -1453,12 +1467,19 @@
                         <td>
                             ${isApproved 
                                 ? `<span class="stream-tag tag-paid">ACTIVATED ✅</span>` 
-                                : `<button class="btn-ctrl" onclick="activateDevice('${c.deviceId}', '${c.planName || 'VIP'}', ${c.amount || 9.99})" style="background:var(--primary); color:#fff; padding:6px 12px; font-size:12px;">✅ Activate</button>`
+                                : `<button class="btn-ctrl" data-device-id="${c.deviceId}" data-plan-name="${c.planName || 'Royal Patron'}" data-amount="${c.amount || 9.99}" onclick="activateDeviceFromButton(this)" style="background:var(--primary); color:#fff; padding:6px 14px; font-size:12px; cursor:pointer;">✅ Activate</button>`
                             }
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function activateDeviceFromButton(btn) {
+            const deviceId = btn.dataset.deviceId;
+            const planName = btn.dataset.planName || "VIP";
+            const amount = parseFloat(btn.dataset.amount) || 9.99;
+            activateDevice(deviceId, planName, amount);
         }
 
         async function activateDevice(deviceId, planName = "Pro Scholar", amount = 9.99, customDuration = null) {
