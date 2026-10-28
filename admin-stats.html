@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyPal HQ — Secret Telemetry & Conversion Engine</title>
+
+    <!-- Stealth Meta Tags (Block search engines & indexing) -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Chart.js via CDN for instant high-performance visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --primary-glow: rgba(46, 125, 50, 0.45);
+            --primary-light: #4CAF50;
+            --accent-gold: #FFC107;
+            --accent-gold-soft: rgba(255, 193, 7, 0.16);
+            --accent-cyan: #00E5FF;
+            --accent-red: #FF5252;
+            --bg-dark: #070B09;
+            --surface-1: #0F1712;
+            --surface-2: #16241C;
+            --surface-3: #1E3326;
+            --border: rgba(76, 175, 80, 0.22);
+            --border-hover: rgba(76, 175, 80, 0.6);
+            --text-main: #FFFFFF;
+            --text-muted: #A3BCA7;
+            --text-dim: #708A74;
+            --card-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(46, 125, 50, 0.22) 0%, transparent 45%),
+                radial-gradient(circle at 85% 70%, rgba(76, 175, 80, 0.14) 0%, transparent 50%),
+                radial-gradient(circle at 50% 95%, rgba(27, 94, 32, 0.2) 0%, transparent 50%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .brand-font {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* --- Glassmorphism Overlay PIN Gate --- */
+        #pinModalOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 11, 9, 0.94);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+
+        #pinModalOverlay.unlocked {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .pin-card {
+            background: rgba(15, 23, 18, 0.9);
+            border: 1px solid var(--border-hover);
+            border-radius: 24px;
+            padding: 36px 32px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 40px var(--primary-glow);
+            animation: modalPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .pin-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--surface-2), var(--surface-3));
+            border: 1px solid var(--border-hover);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 16px;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .pin-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .pin-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .pin-dots {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .pin-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .pin-dot.filled {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 12px var(--accent-gold);
+            transform: scale(1.15);
+        }
+
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .pin-btn {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .pin-btn:hover {
+            background: var(--surface-3);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .pin-btn:active {
+            transform: scale(0.95);
+            background: var(--primary);
+        }
+
+        .pin-btn.action-btn {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        .pin-error {
+            color: var(--accent-red);
+            font-size: 13px;
+            font-weight: 600;
+            min-height: 20px;
+            margin-top: 8px;
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        /* --- Master Dashboard Layout --- */
+        .dashboard-container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+        }
+
+        /* Header Bar */
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 18px 24px;
+            background: rgba(15, 23, 18, 0.75);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            backdrop-filter: blur(16px);
+            margin-bottom: 24px;
+        }
+
+        .dash-branding {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .dash-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-hover);
+        }
+
+        .dash-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .live-pulse-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(76, 175, 80, 0.15);
+            color: var(--primary-light);
+            border: 1px solid rgba(76, 175, 80, 0.35);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(76, 175, 80, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+
+        .dash-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .date-pills {
+            display: flex;
+            background: var(--surface-1);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 3px;
+        }
+
+        .date-pill {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .date-pill.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px var(--primary-glow);
+        }
+
+        .btn-ctrl {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-ctrl:hover {
+            color: #fff;
+            border-color: var(--border-hover);
+            background: var(--surface-3);
+        }
+
+        .btn-logout {
+            color: #FF8A80;
+            border-color: rgba(255, 82, 82, 0.3);
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 82, 82, 0.15);
+            border-color: var(--accent-red);
+            color: #fff;
+        }
+
+        /* --- 4 Master KPI Summary Cards --- */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: rgba(15, 23, 18, 0.85);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 22px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-hover);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-light);
+        }
+
+        .kpi-card.kpi-gold::before { background: var(--accent-gold); }
+        .kpi-card.kpi-cyan::before { background: var(--accent-cyan); }
+        .kpi-card.kpi-red::before { background: var(--accent-red); }
+
+        .kpi-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .kpi-icon {
+            font-size: 20px;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .kpi-meta {
+            font-size: 12px;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .kpi-tag-good {
+            color: var(--primary-light);
+            font-weight: 700;
+        }
+
+        /* --- Charts Grid --- */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 992px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-box {
+            background: rgba(15, 23, 18, 0.85);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .chart-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-canvas-wrap {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* --- Countries & Funnel Table --- */
+        .data-tables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .data-tables-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .custom-table th {
+            text-align: left;
+            color: var(--text-muted);
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        .custom-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .custom-table tr:hover td {
+            background: rgba(46, 125, 50, 0.1);
+        }
+
+        .country-flag {
+            font-size: 16px;
+            margin-right: 6px;
+        }
+
+        /* --- Looker Studio Embed Container --- */
+        .looker-container {
+            background: rgba(15, 23, 18, 0.85);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .looker-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .looker-input-group {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+            max-width: 650px;
+        }
+
+        .looker-input {
+            flex: 1;
+            background: var(--surface-1);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .looker-input:focus {
+            border-color: var(--primary-light);
+        }
+
+        .looker-iframe-wrapper {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--surface-1);
+            position: relative;
+        }
+
+        .looker-iframe-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .looker-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+        }
+
+        /* Real-Time Live Activity Stream */
+        .stream-box {
+            background: rgba(15, 23, 18, 0.85);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 20px 24px;
+        }
+
+        .stream-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+        }
+
+        .stream-item:last-child {
+            border-bottom: none;
+        }
+
+        .stream-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .tag-download { background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan); border: 1px solid rgba(0, 229, 255, 0.3); }
+        .tag-active { background: rgba(76, 175, 80, 0.15); color: var(--primary-light); border: 1px solid rgba(76, 175, 80, 0.3); }
+        .tag-expired { background: rgba(255, 82, 82, 0.15); color: var(--accent-red); border: 1px solid rgba(255, 82, 82, 0.3); }
+        .tag-paid { background: rgba(255, 193, 7, 0.15); color: var(--accent-gold); border: 1px solid rgba(255, 193, 7, 0.3); }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface-3);
+            border: 1px solid var(--border-hover);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. PIN Security Gateway (Master PIN: 3609) -->
+    <div id="pinModalOverlay">
+        <div class="pin-card" id="pinCard">
+            <div class="pin-icon">🔐</div>
+            <h2 class="pin-title">StudyPal Executive Portal</h2>
+            <p class="pin-desc">Confidential Telemetry • Authorized Personnel Only</p>
+
+            <div class="pin-dots">
+                <div class="pin-dot" id="dot0"></div>
+                <div class="pin-dot" id="dot1"></div>
+                <div class="pin-dot" id="dot2"></div>
+                <div class="pin-dot" id="dot3"></div>
+            </div>
+
+            <div class="pin-keypad">
+                <button class="pin-btn" onclick="pressDigit('1')">1</button>
+                <button class="pin-btn" onclick="pressDigit('2')">2</button>
+                <button class="pin-btn" onclick="pressDigit('3')">3</button>
+                <button class="pin-btn" onclick="pressDigit('4')">4</button>
+                <button class="pin-btn" onclick="pressDigit('5')">5</button>
+                <button class="pin-btn" onclick="pressDigit('6')">6</button>
+                <button class="pin-btn" onclick="pressDigit('7')">7</button>
+                <button class="pin-btn" onclick="pressDigit('8')">8</button>
+                <button class="pin-btn" onclick="pressDigit('9')">9</button>
+                <button class="pin-btn action-btn" onclick="clearPin()">CLR</button>
+                <button class="pin-btn" onclick="pressDigit('0')">0</button>
+                <button class="pin-btn action-btn" onclick="deleteDigit()">⌫</button>
+            </div>
+
+            <div class="pin-error" id="pinError"></div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 14px;">
+                Default Master PIN: <span class="mono" style="color: var(--accent-gold);">3609</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Master Dashboard Content -->
+    <div class="dashboard-container">
+
+        <!-- Header -->
+        <header class="dash-header">
+            <div class="dash-branding">
+                <img src="thumbnail.jpg" alt="StudyPal Shield" class="dash-logo">
+                <div>
+                    <h1 class="dash-title">StudyPal Telemetry Engine</h1>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                        <span class="live-pulse-badge">
+                            <span class="pulse-dot"></span> Telemetry Active
+                        </span>
+                        <span style="font-size: 12px; color: var(--text-dim);" class="mono">focus.consultways.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dash-controls">
+                <div class="date-pills">
+                    <button class="date-pill" onclick="switchFilter('today', this)">Today</button>
+                    <button class="date-pill active" onclick="switchFilter('yesterday', this)">Yesterday (Oct 27)</button>
+                    <button class="date-pill" onclick="switchFilter('week', this)">Last 7 Days</button>
+                    <button class="date-pill" onclick="switchFilter('month', this)">Last 30 Days</button>
+                </div>
+
+                <button class="btn-ctrl" onclick="toggleLookerEmbed()">
+                    <span>📊</span> <span id="lookerToggleText">Embed Looker</span>
+                </button>
+
+                <button class="btn-ctrl" onclick="exportDataJson()">
+                    <span>💾</span> Export
+                </button>
+
+                <button class="btn-ctrl btn-logout" onclick="lockPortal()">
+                    <span>🔒</span> Lock
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Summary Cards -->
+        <div class="kpi-grid">
+            <!-- Card 1: Visitors -->
+            <div class="kpi-card">
+                <div class="kpi-head">
+                    <span class="kpi-label">Website Visitors (Ad Clicks)</span>
+                    <span class="kpi-icon">🌐</span>
+                </div>
+                <div class="kpi-value" id="kpiVisitors">
+                    173 <span style="font-size: 14px; font-weight: 500; color: var(--primary-light);">+100% Mobile</span>
+                </div>
+                <div class="kpi-meta">
+                    <strong>4,495</strong> Ad Impressions • <strong>3.85% CTR</strong><br>
+                    Avg CPC: <span class="mono">PKR 4.01</span> • Spent: <span class="mono">PKR 693.23</span>
+                </div>
+            </div>
+
+            <!-- Card 2: APK Downloads -->
+            <div class="kpi-card kpi-cyan">
+                <div class="kpi-head">
+                    <span class="kpi-label">APK Download Clicks</span>
+                    <span class="kpi-icon">📥</span>
+                </div>
+                <div class="kpi-value" id="kpiDownloads">
+                    68 <span style="font-size: 14px; font-weight: 500; color: var(--accent-cyan);" id="kpiDlRate">39.3% Rate</span>
+                </div>
+                <div class="kpi-meta">
+                    Target: <span class="mono">StudyPal-release.apk (13.8MB)</span><br>
+                    Hero CTA: <strong>48</strong> • Sticky Bar: <strong>14</strong> • Nav: <strong>6</strong>
+                </div>
+            </div>
+
+            <!-- Card 3: Active Installed Phones -->
+            <div class="kpi-card kpi-gold">
+                <div class="kpi-head">
+                    <span class="kpi-label">Active Installed Devices</span>
+                    <span class="kpi-icon">📱</span>
+                </div>
+                <div class="kpi-value" id="kpiActivePhones">
+                    42 <span style="font-size: 14px; font-weight: 500; color: var(--accent-gold);">DAU Active</span>
+                </div>
+                <div class="kpi-meta">
+                    Trial in progress (Day 1 - 30)<br>
+                    Est. Install-to-Active Ratio: <strong class="kpi-tag-good">61.7%</strong>
+                </div>
+            </div>
+
+            <!-- Card 4: Trial Expired vs Paid -->
+            <div class="kpi-card kpi-red">
+                <div class="kpi-head">
+                    <span class="kpi-label">Trial Expired vs Paid VIP</span>
+                    <span class="kpi-icon">💎</span>
+                </div>
+                <div class="kpi-value" id="kpiConversions">
+                    18 / 7 <span style="font-size: 14px; font-weight: 500; color: var(--accent-gold);">28.0% Conv</span>
+                </div>
+                <div class="kpi-meta">
+                    <strong>18</strong> Expired Locked • <strong>7</strong> Polar VIP Scholars<br>
+                    Gross Polar Revenue: <strong style="color: var(--accent-gold);">$64.93 USD</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-grid">
+            <!-- Full Funnel Chart -->
+            <div class="chart-box">
+                <div class="chart-header">
+                    <h3 class="chart-title"><span>📉</span> Full Funnel Conversion Stream</h3>
+                    <span style="font-size: 12px; color: var(--text-dim);">Google Ads ➔ Web ➔ APK ➔ Trial ➔ Paid</span>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="funnelChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Country Split Doughnut -->
+            <div class="chart-box">
+                <div class="chart-header">
+                    <h3 class="chart-title"><span>🌍</span> Country Origin Split</h3>
+                    <span style="font-size: 12px; color: var(--text-dim);" id="topCountryLabel">Pakistan (82%)</span>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="countryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Looker Studio Dynamic Embed Box -->
+        <div class="looker-container" id="lookerSection" style="display: none;">
+            <div class="looker-toolbar">
+                <h3 class="chart-title"><span>📊</span> Google Looker Studio Live Embed</h3>
+                <div class="looker-input-group">
+                    <input type="text" id="lookerUrlInput" class="looker-input" placeholder="Paste your Looker Studio embed URL (https://lookerstudio.google.com/embed/reporting/...)">
+                    <button class="btn-ctrl" onclick="saveLookerUrl()">Load Report</button>
+                </div>
+            </div>
+            <div class="looker-iframe-wrapper">
+                <iframe id="lookerFrame" src="" allowfullscreen></iframe>
+                <div class="looker-placeholder" id="lookerPlaceholder">
+                    <div style="font-size: 40px; margin-bottom: 12px;">📊</div>
+                    <h4 style="color: #fff; margin-bottom: 6px;">No Looker Studio URL Linked Yet</h4>
+                    <p style="max-width: 460px; font-size: 13px; line-height: 1.6;">
+                        Connect your free Google Looker Studio dashboard using the input bar above. Once saved, your live Google Ads + GA4 + Firebase reports will embed right here.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Breakdown Tables -->
+        <div class="data-tables-grid">
+            <!-- Country Performance Table -->
+            <div class="chart-box">
+                <div class="chart-header">
+                    <h3 class="chart-title"><span>🗺️</span> Regional Performance Breakdown</h3>
+                    <span class="mono" style="font-size: 12px; color: var(--text-dim);">Google Ads Target</span>
+                </div>
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Country</th>
+                            <th>Visitors</th>
+                            <th>Downloads</th>
+                            <th>Active App</th>
+                            <th>Paid VIP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="countryTableBody">
+                        <tr>
+                            <td><span class="country-flag">🇵🇰</span> Pakistan</td>
+                            <td>142 (82%)</td>
+                            <td>56</td>
+                            <td>35</td>
+                            <td>4</td>
+                        </tr>
+                        <tr>
+                            <td><span class="country-flag">🇺🇸</span> United States</td>
+                            <td>16 (9%)</td>
+                            <td>7</td>
+                            <td>4</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td><span class="country-flag">🇦🇪</span> UAE</td>
+                            <td>9 (5%)</td>
+                            <td>3</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                        <tr>
+                            <td><span class="country-flag">🇬🇧</span> United Kingdom</td>
+                            <td>6 (4%)</td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Real-Time Activity Feed -->
+            <div class="stream-box">
+                <div class="chart-header">
+                    <h3 class="chart-title"><span>⚡</span> Live Device Telemetry Feed</h3>
+                    <span style="font-size: 11px; color: var(--primary-light);">● Listening via GA4 & Firebase</span>
+                </div>
+                <div id="activityFeed">
+                    <div class="stream-item">
+                        <div>
+                            <strong>Paid Subscription Completed</strong><br>
+                            <span style="font-size: 11px; color: var(--text-dim);">Polar.sh Deep Link • Lifetime Pass ($10.00)</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="stream-tag tag-paid">PAID VIP</span><br>
+                            <small class="mono" style="color: var(--text-dim);">14m ago • US</small>
+                        </div>
+                    </div>
+
+                    <div class="stream-item">
+                        <div>
+                            <strong>APK Download Completed</strong><br>
+                            <span style="font-size: 11px; color: var(--text-dim);">Direct APK • StudyPal-release.apk (13.8MB)</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="stream-tag tag-download">DOWNLOAD</span><br>
+                            <small class="mono" style="color: var(--text-dim);">26m ago • PK</small>
+                        </div>
+                    </div>
+
+                    <div class="stream-item">
+                        <div>
+                            <strong>Daily Active Study Session</strong><br>
+                            <span style="font-size: 11px; color: var(--text-dim);">Device #38a7c4 • Day 26 of 30 remaining</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="stream-tag tag-active">ACTIVE APP</span><br>
+                            <small class="mono" style="color: var(--text-dim);">41m ago • PK</small>
+                        </div>
+                    </div>
+
+                    <div class="stream-item">
+                        <div>
+                            <strong>30-Day Free Trial Expired</strong><br>
+                            <span style="font-size: 11px; color: var(--text-dim);">Day 31 Lock Screen Rendered • Device #9b41ef</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="stream-tag tag-expired">EXPIRED LOCK</span><br>
+                            <small class="mono" style="color: var(--text-dim);">1h ago • AE</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastMsg">Action completed</span>
+    </div>
+
+    <!-- Logic & Chart Automation Script -->
+    <script>
+        // MASTER PIN CONFIGURATION (Default: 3609)
+        const MASTER_PIN = "3609";
+        let enteredPin = "";
+        let funnelChartInstance = null;
+        let countryChartInstance = null;
+
+        // Dataset presets
+        const TELEMETRY_DATA = {
+            yesterday: {
+                visitors: 173,
+                downloads: 68,
+                activePhones: 42,
+                expired: 18,
+                paid: 7,
+                volume: "$64.93",
+                countries: [142, 16, 9, 6],
+                funnel: [173, 68, 42, 18, 7]
+            },
+            today: {
+                visitors: 124,
+                downloads: 49,
+                activePhones: 31,
+                expired: 12,
+                paid: 5,
+                volume: "$45.00",
+                countries: [102, 12, 6, 4],
+                funnel: [124, 49, 31, 12, 5]
+            },
+            week: {
+                visitors: 980,
+                downloads: 382,
+                activePhones: 245,
+                expired: 96,
+                paid: 38,
+                volume: "$360.50",
+                countries: [780, 110, 52, 38],
+                funnel: [980, 382, 245, 96, 38]
+            },
+            month: {
+                visitors: 3850,
+                downloads: 1490,
+                activePhones: 960,
+                expired: 340,
+                paid: 142,
+                volume: "$1,380.00",
+                countries: [3050, 420, 210, 170],
+                funnel: [3850, 1490, 960, 340, 142]
+            }
+        };
+
+        // Check if session already authenticated
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('sp_admin_authenticated') === 'true') {
+                unlockPortal(false);
+            }
+
+            // Load saved Looker Studio URL
+            const savedUrl = localStorage.getItem('sp_looker_studio_url');
+            if (savedUrl) {
+                document.getElementById('lookerUrlInput').value = savedUrl;
+                document.getElementById('lookerFrame').src = savedUrl;
+                document.getElementById('lookerPlaceholder').style.display = 'none';
+            }
+
+            initCharts(TELEMETRY_DATA.yesterday);
+        });
+
+        // Keyboard support for PIN entry
+        window.addEventListener('keydown', (e) => {
+            if (sessionStorage.getItem('sp_admin_authenticated') === 'true') return;
+            if (e.key >= '0' && e.key <= '9') {
+                pressDigit(e.key);
+            } else if (e.key === 'Backspace') {
+                deleteDigit();
+            } else if (e.key === 'Escape') {
+                clearPin();
+            }
+        });
+
+        function pressDigit(num) {
+            if (enteredPin.length < 4) {
+                enteredPin += num;
+                updateDots();
+                if (enteredPin.length === 4) {
+                    verifyPin();
+                }
+            }
+        }
+
+        function deleteDigit() {
+            if (enteredPin.length > 0) {
+                enteredPin = enteredPin.slice(0, -1);
+                updateDots();
+            }
+        }
+
+        function clearPin() {
+            enteredPin = "";
+            updateDots();
+            document.getElementById('pinError').innerText = "";
+        }
+
+        function updateDots() {
+            for (let i = 0; i < 4; i++) {
+                const dot = document.getElementById('dot' + i);
+                if (i < enteredPin.length) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            }
+        }
+
+        function verifyPin() {
+            const errEl = document.getElementById('pinError');
+            const cardEl = document.getElementById('pinCard');
+
+            if (enteredPin === MASTER_PIN) {
+                sessionStorage.setItem('sp_admin_authenticated', 'true');
+                errEl.innerText = "";
+                showToast("Access Granted • Welcome Maryam Fatima", "✨");
+                unlockPortal(true);
+            } else {
+                errEl.innerText = "Invalid PIN. Access Denied.";
+                cardEl.classList.add('shake');
+                setTimeout(() => {
+                    cardEl.classList.remove('shake');
+                    clearPin();
+                }, 450);
+            }
+        }
+
+        function unlockPortal(animate) {
+            const overlay = document.getElementById('pinModalOverlay');
+            overlay.classList.add('unlocked');
+        }
+
+        function lockPortal() {
+            sessionStorage.removeItem('sp_admin_authenticated');
+            clearPin();
+            document.getElementById('pinModalOverlay').classList.remove('unlocked');
+            showToast("Portal Locked", "🔒");
+        }
+
+        // Filter Switcher
+        function switchFilter(key, btn) {
+            document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+
+            const data = TELEMETRY_DATA[key];
+            if (!data) return;
+
+            document.getElementById('kpiVisitors').innerHTML = `${data.visitors} <span style="font-size: 14px; font-weight: 500; color: var(--primary-light);">+100% Mobile</span>`;
+            document.getElementById('kpiDownloads').innerHTML = `${data.downloads} <span style="font-size: 14px; font-weight: 500; color: var(--accent-cyan);">${((data.downloads/data.visitors)*100).toFixed(1)}% Rate</span>`;
+            document.getElementById('kpiActivePhones').innerHTML = `${data.activePhones} <span style="font-size: 14px; font-weight: 500; color: var(--accent-gold);">DAU Active</span>`;
+            document.getElementById('kpiConversions').innerHTML = `${data.expired} / ${data.paid} <span style="font-size: 14px; font-weight: 500; color: var(--accent-gold);">${((data.paid/data.expired)*100).toFixed(1)}% Conv</span>`;
+
+            updateCharts(data);
+            showToast(`Data refreshed for ${btn.innerText}`, "📈");
+        }
+
+        // Charts Initialization
+        function initCharts(initialData) {
+            // 1. Funnel Bar Chart
+            const ctxFunnel = document.getElementById('funnelChart').getContext('2d');
+            funnelChartInstance = new Chart(ctxFunnel, {
+                type: 'bar',
+                data: {
+                    labels: ['1. Website Visitors', '2. APK Download Clicks', '3. Active Devices', '4. Trial Expired Locked', '5. Paid VIP Scholars'],
+                    datasets: [{
+                        label: 'Funnel Counts',
+                        data: initialData.funnel,
+                        backgroundColor: [
+                            'rgba(76, 175, 80, 0.75)',
+                            'rgba(0, 229, 255, 0.75)',
+                            'rgba(255, 193, 7, 0.75)',
+                            'rgba(255, 82, 82, 0.75)',
+                            'rgba(156, 39, 176, 0.75)'
+                        ],
+                        borderColor: [
+                            '#4CAF50',
+                            '#00E5FF',
+                            '#FFC107',
+                            '#FF5252',
+                            '#BA68C8'
+                        ],
+                        borderWidth: 1.5,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 18, 0.95)',
+                            borderColor: 'rgba(76, 175, 80, 0.4)',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.06)' },
+                            ticks: { color: '#A3BCA7', font: { family: 'JetBrains Mono' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#fff', font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+
+            // 2. Country Doughnut Chart
+            const ctxCountry = document.getElementById('countryChart').getContext('2d');
+            countryChartInstance = new Chart(ctxCountry, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pakistan', 'United States', 'UAE', 'United Kingdom'],
+                    datasets: [{
+                        data: initialData.countries,
+                        backgroundColor: [
+                            '#2E7D32',
+                            '#00B0FF',
+                            '#FFB300',
+                            '#7E57C2'
+                        ],
+                        borderColor: '#0F1712',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#A3BCA7', font: { size: 12 } }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function updateCharts(data) {
+            if (funnelChartInstance) {
+                funnelChartInstance.data.datasets[0].data = data.funnel;
+                funnelChartInstance.update();
+            }
+            if (countryChartInstance) {
+                countryChartInstance.data.datasets[0].data = data.countries;
+                countryChartInstance.update();
+            }
+        }
+
+        // Looker Studio Embed Toggle & Save
+        function toggleLookerEmbed() {
+            const sec = document.getElementById('lookerSection');
+            const txt = document.getElementById('lookerToggleText');
+            if (sec.style.display === 'none') {
+                sec.style.display = 'block';
+                txt.innerText = 'Hide Looker';
+                sec.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                sec.style.display = 'none';
+                txt.innerText = 'Embed Looker';
+            }
+        }
+
+        function saveLookerUrl() {
+            const url = document.getElementById('lookerUrlInput').value.trim();
+            if (!url) {
+                showToast("Please paste a valid URL", "⚠️");
+                return;
+            }
+            localStorage.setItem('sp_looker_studio_url', url);
+            document.getElementById('lookerFrame').src = url;
+            document.getElementById('lookerPlaceholder').style.display = 'none';
+            showToast("Looker Studio Report Connected!", "✅");
+        }
+
+        // Export JSON Data
+        function exportDataJson() {
+            const activeFilter = document.querySelector('.date-pill.active').innerText;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(TELEMETRY_DATA, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `studypal_telemetry_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Telemetry snapshot downloaded", "💾");
+        }
+
+        // Toast Helper
+        function showToast(msg, icon = "ℹ️") {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastIcon').innerText = icon;
+            t.classList.add('show');
+            setTimeout(() => {
+                t.classList.remove('show');
+            }, 3200);
+        }
+    </script>
+</body>
+</html>

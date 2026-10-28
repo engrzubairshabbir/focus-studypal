@@ -19,6 +19,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Google Analytics 4 (GA4) Global Site Tag (consult-ways / StudyPal) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q315VNV99G"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Q315VNV99G', {
+            send_page_view: true,
+            cookie_flags: 'SameSite=None;Secure'
+        });
+    </script>
+    
     <style>
         :root {
             --primary: #2E7D32;
@@ -1035,5 +1047,71 @@
         </div>
     </footer>
 
+    <!-- Telemetry & Event Analytics Tracking -->
+    <script>
+        (function() {
+            // Helper function to safely send events to GA4
+            function trackEvent(eventName, params) {
+                if (typeof window.gtag === 'function') {
+                    window.gtag('event', eventName, params);
+                }
+                // Debug log in developer console
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.log('[Telemetry Tracked]', eventName, params);
+                }
+            }
+
+            // Global delegated click listener (zero impact on DOM rendering speed)
+            document.addEventListener('click', function(e) {
+                var target = e.target.closest('a');
+                if (!target) return;
+
+                var href = target.getAttribute('href') || '';
+                var isApkDownload = target.hasAttribute('download') || href.endsWith('.apk') || href.indexOf('StudyPal') !== -1;
+                var isInstallGuide = href === '#how-to-install' || target.innerText.indexOf('Install Guide') !== -1;
+                var isPolarCheckout = href.indexOf('buy.polar.sh') !== -1;
+
+                // 1. APK Download Clicks
+                if (isApkDownload) {
+                    var location = 'body_link';
+                    if (target.closest('header')) location = 'header_nav';
+                    else if (target.closest('.cta-container')) location = 'hero_cta';
+                    else if (target.closest('.sticky-mobile-bar')) location = 'mobile_sticky_bar';
+
+                    trackEvent('apk_download_click', {
+                        app_name: 'StudyPal Focus Sanctuary',
+                        version: 'V24.8',
+                        file_name: 'StudyPal-release.apk',
+                        file_size_mb: 13.8,
+                        cta_location: location,
+                        traffic_source: document.referrer || 'direct_or_google_ads'
+                    });
+                }
+
+                // 2. Install Guide (Sideload) Clicks
+                if (isInstallGuide) {
+                    trackEvent('install_guide_click', {
+                        section: 'how-to-install',
+                        source_button: target.innerText.trim()
+                    });
+                }
+
+                // 3. Polar.sh Support & Payment Clicks
+                if (isPolarCheckout) {
+                    var isLifetime = href.indexOf('y2XU4ws6rhMikF1HsaVoLUKcmGMm1z5asbfuy2SBSCi') !== -1;
+                    var tierName = isLifetime ? 'Lifetime Scholar Pass ($1-$99)' : 'Monthly Supporter ($4.99/mo)';
+                    var estimatedAmount = isLifetime ? 10.00 : 4.99;
+
+                    trackEvent('polar_checkout_click', {
+                        tier: tierName,
+                        amount: estimatedAmount,
+                        currency: 'USD',
+                        checkout_url: href,
+                        payment_provider: 'polar_sh'
+                    });
+                }
+            }, { passive: true });
+        })();
+    </script>
 </body>
 </html>
