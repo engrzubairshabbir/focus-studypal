@@ -122,7 +122,7 @@
           "name": "How does an offline parental control app for Android without internet work?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "StudyPal functions as an offline parental control app for Android without internet using a local Wi-Fi LAN server (http://192.168.1.X:8080). Parents monitor study sessions, review milestones, and award break tokens from any browser without external subscriptions or cloud tracking."
+            "text": "StudyPal functions as an offline parental control app for Android without internet using a local Wi-Fi LAN server. Parents scan a dynamic on-screen QR code (just like WhatsApp Web) to monitor study sessions, review milestones, and award break tokens from any browser without external subscriptions or cloud tracking."
           }
         },
         {
@@ -1278,6 +1278,73 @@
             word-break: break-all;
         }
 
+        /* QR Code Connect Showcase */
+        .qr-connect-showcase {
+            background: linear-gradient(135deg, rgba(22, 36, 28, 0.95), rgba(15, 23, 18, 0.95));
+            border: 1px solid rgba(0, 230, 118, 0.35);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 22px 0;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            box-shadow: 0 10px 30px rgba(0, 230, 118, 0.08);
+        }
+
+        .qr-icon-wrapper {
+            width: 84px;
+            height: 84px;
+            background: #000;
+            border: 2px solid var(--primary-neon);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 24px rgba(0, 230, 118, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-scan-line {
+            position: absolute;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00E676, transparent);
+            box-shadow: 0 0 8px #00E676;
+            animation: qrScan 2.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes qrScan {
+            0% { top: 12px; opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { top: 68px; opacity: 0.4; }
+        }
+
+        .qr-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--primary-neon);
+            border: 1px solid rgba(0, 230, 118, 0.35);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: 0.03em;
+        }
+
+        @media (max-width: 600px) {
+            .qr-connect-showcase {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+                padding: 20px 16px;
+            }
+        }
+
         .patron-card-badge {
             position: absolute;
             top: -12px;
@@ -1594,14 +1661,46 @@
                 Parents across the United States, United Kingdom, Canada, Australia, and Europe are rightfully alarmed by modern parental control suites that secretly harvest childrens' location, browsing history, and private messages to external third-party cloud servers—often accompanied by predatory $15/month subscriptions.
             </p>
             <p class="editorial-body">
-                <strong>Offline parental control app for Android without internet:</strong> StudyPal pioneers sovereign local-network parenting. When active, StudyPal hosts an ultra-lightweight, zero-cloud web portal directly on your child's device. As long as both devices share your home Wi-Fi network, any parent smartphone, iPad, or Mac/PC browser can open:
+                <strong>Offline parental control app for Android without internet:</strong> StudyPal pioneers sovereign local-network parenting. When active, StudyPal hosts an ultra-lightweight, zero-cloud web portal directly on your child's device. No complicated setup or manual IP address typing required!
             </p>
 
-            <div style="text-align: center; margin: 16px 0;">
-                <span class="code-snippet-box">http://192.168.1.X:8080 (Encrypted Home LAN Dashboard)</span>
+            <!-- WhatsApp-Style QR Code Pairing Showcase -->
+            <div class="qr-connect-showcase">
+                <div class="qr-icon-wrapper">
+                    <div class="qr-scan-line"></div>
+                    <!-- Crisp Modern SVG QR Code Icon -->
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                        <rect x="6" y="6" width="1" height="1" fill="#00E676"></rect>
+                        <rect x="17" y="6" width="1" height="1" fill="#00E676"></rect>
+                        <rect x="6" y="17" width="1" height="1" fill="#00E676"></rect>
+                        <line x1="14" y1="17" x2="17" y2="17"></line>
+                        <line x1="17" y1="14" x2="17" y2="15"></line>
+                        <line x1="10" y1="3" x2="10" y2="7"></line>
+                        <line x1="3" y1="10" x2="7" y2="10"></line>
+                    </svg>
+                </div>
+                <div>
+                    <div class="qr-badge-pill">⚡ INSTANT 1-TAP PAIRING (SAME AS WHATSAPP WEB)</div>
+                    <h3 style="font-size: 18px; color: #fff; margin-bottom: 6px;">Scan On-Screen QR Code with Any Phone to Connect</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin: 0;">
+                        Connecting is as simple as scanning a WhatsApp Web QR code! StudyPal generates a dynamic QR code directly on your child's screen. Parents simply point their iPhone or Android camera at the screen—no typing IP addresses or complex setup required—and tap to open the encrypted local LAN dashboard:
+                    </p>
+                    <div style="margin-top: 8px;">
+                        <span class="code-snippet-box">http://192.168.1.X:8080 (Auto-Discovered via Dynamic QR Scan)</span>
+                    </div>
+                </div>
             </div>
 
             <div class="editorial-grid">
+                <div class="editorial-feature-card">
+                    <div class="editorial-card-icon">📷</div>
+                    <div class="editorial-card-title">1-Tap WhatsApp-Style QR Connect</div>
+                    <div class="editorial-card-desc">No manual IP typing. Just point any smartphone or tablet camera at your child's screen to scan the secure QR code and launch the dashboard instantly.</div>
+                </div>
                 <div class="editorial-feature-card">
                     <div class="editorial-card-icon">🌐</div>
                     <div class="editorial-card-title">Zero Internet & Zero Cloud Required</div>
@@ -1936,7 +2035,7 @@
             <!-- Q2 -->
             <div class="faq-item">
                 <h4>How does an offline parental control app for Android without internet keep kids focused?</h4>
-                <p>StudyPal functions as an offline parental control app for Android without internet using a local Wi-Fi LAN server (http://192.168.1.X:8080). Parents monitor study sessions, review milestones, and award break tokens from any browser without external subscriptions or cloud tracking.</p>
+                <p>StudyPal functions as an offline parental control app for Android without internet using a local Wi-Fi LAN server. Parents simply scan a dynamic on-screen QR code (just like WhatsApp Web) or visit http://192.168.1.X:8080 to monitor study sessions, review milestones, and award break tokens from any browser without external subscriptions or cloud tracking.</p>
             </div>
 
             <!-- Q3 -->
