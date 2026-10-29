@@ -1333,12 +1333,18 @@
         }
 
         function saveLookerUrl() {
-            const url = document.getElementById('lookerUrlInput').value.trim();
+            let url = document.getElementById('lookerUrlInput').value.trim();
             if (!url) {
                 showToast("Please paste a valid URL", "⚠️");
                 return;
             }
+            // Auto-extract URL if user pastes the full <iframe src="..."> embed snippet
+            const iframeMatch = url.match(/src=["']([^"']+)["']/i);
+            if (iframeMatch) {
+                url = iframeMatch[1];
+            }
             localStorage.setItem('sp_looker_studio_url', url);
+            document.getElementById('lookerUrlInput').value = url;
             document.getElementById('lookerFrame').src = url;
             document.getElementById('lookerPlaceholder').style.display = 'none';
             showToast("Looker Studio Report Connected!", "✅");
