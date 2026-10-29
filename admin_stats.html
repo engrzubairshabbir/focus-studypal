@@ -701,7 +701,7 @@
                 </div>
 
                 <button class="btn-ctrl" onclick="toggleLookerEmbed()">
-                    <span>📊</span> <span id="lookerToggleText">Embed Looker</span>
+                    <span>📊</span> <span id="lookerToggleText">Hide Looker</span>
                 </button>
 
                 <button class="btn-ctrl" onclick="exportDataJson()">
@@ -803,17 +803,17 @@
         </div>
 
         <!-- Looker Studio Dynamic Embed Box -->
-        <div class="looker-container" id="lookerSection" style="display: none;">
+        <div class="looker-container" id="lookerSection" style="display: block; margin-bottom: 24px;">
             <div class="looker-toolbar">
-                <h3 class="chart-title"><span>📊</span> Google Looker Studio Live Embed</h3>
+                <h3 class="chart-title"><span>📊</span> Google Looker Studio Live Real-Time Telemetry</h3>
                 <div class="looker-input-group">
-                    <input type="text" id="lookerUrlInput" class="looker-input" placeholder="Paste your Looker Studio embed URL (https://lookerstudio.google.com/embed/reporting/...)">
-                    <button class="btn-ctrl" onclick="saveLookerUrl()">Load Report</button>
+                    <input type="text" id="lookerUrlInput" class="looker-input" value="https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG" placeholder="Paste your Looker Studio embed URL (https://lookerstudio.google.com/embed/reporting/...)">
+                    <button class="btn-ctrl" onclick="saveLookerUrl()">Update Report</button>
                 </div>
             </div>
             <div class="looker-iframe-wrapper">
-                <iframe id="lookerFrame" src="" allowfullscreen></iframe>
-                <div class="looker-placeholder" id="lookerPlaceholder">
+                <iframe id="lookerFrame" src="https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG" frameborder="0" style="border:0" allowfullscreen sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+                <div class="looker-placeholder" id="lookerPlaceholder" style="display: none;">
                     <div style="font-size: 40px; margin-bottom: 12px;">📊</div>
                     <h4 style="color: #fff; margin-bottom: 6px;">No Looker Studio URL Linked Yet</h4>
                     <p style="max-width: 460px; font-size: 13px; line-height: 1.6;">
@@ -1116,8 +1116,9 @@
                 unlockPortal(false);
             }
 
-            // Load saved Looker Studio URL
-            const savedUrl = localStorage.getItem('sp_looker_studio_url');
+            // Load saved Looker Studio URL (Permanent default from project setup)
+            const PERMANENT_LOOKER_URL = "https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG";
+            const savedUrl = localStorage.getItem('sp_looker_studio_url') || PERMANENT_LOOKER_URL;
             if (savedUrl) {
                 document.getElementById('lookerUrlInput').value = savedUrl;
                 document.getElementById('lookerFrame').src = savedUrl;
@@ -1328,7 +1329,7 @@
                 sec.scrollIntoView({ behavior: 'smooth' });
             } else {
                 sec.style.display = 'none';
-                txt.innerText = 'Embed Looker';
+                txt.innerText = 'Show Looker';
             }
         }
 
