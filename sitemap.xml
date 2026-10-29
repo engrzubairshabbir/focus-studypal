@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+    <!-- Primary Landing Domain -->
+    <url>
+        <loc>https://focus.consultways.com/</loc>
+        <lastmod>2026-10-29</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <!-- Direct Download Anchor -->
+    <url>
+        <loc>https://focus.consultways.com/#download</loc>
+        <lastmod>2026-10-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <!-- Dopamine Rehab & Reel Addiction Detangler -->
+    <url>
+        <loc>https://focus.consultways.com/#dopamine-rehab</loc>
+        <lastmod>2026-10-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <!-- Zero-Internet Local LAN Parental Monitor -->
+    <url>
+        <loc>https://focus.consultways.com/#parental-control</loc>
+        <lastmod>2026-10-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <!-- Cognitive Science of Deep Work & ADHD -->
+    <url>
+        <loc>https://focus.consultways.com/#science-of-focus</loc>
+        <lastmod>2026-10-29</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <!-- Verified Sideload Installation Walkthrough -->
+    <url>
+        <loc>https://focus.consultways.com/#install-guide</loc>
+        <lastmod>2026-10-29</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <!-- Polar Transparent Sponsorship & Orphan Education Mission -->
+    <url>
+        <loc>https://focus.consultways.com/#support-mission</loc>
+        <lastmod>2026-10-29</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <!-- High-Intent Voice & Generative AI FAQ -->
+    <url>
+        <loc>https://focus.consultways.com/#faq</loc>
+        <lastmod>2026-10-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+</urlset>

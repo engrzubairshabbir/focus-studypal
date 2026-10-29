@@ -1,0 +1,33 @@
+# robots.txt for focus.consultways.com
+# StudyPal by Maryam Fatima Softwares Inc. under ConsultWays
+
+# 1. Standard Search Engine Crawlers
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: Slurp
+User-agent: DuckDuckBot
+User-agent: Baiduspider
+User-agent: YandexBot
+Allow: /
+Disallow: /admin-stats.html
+Disallow: /admin_stats.html
+
+# 2. Generative AI Search & Answer Engines (AEO / GEO Crawlers)
+User-agent: GPTBot
+User-agent: PerplexityBot
+User-agent: ClaudeBot
+User-agent: anthropic-ai
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin-stats.html
+Disallow: /admin_stats.html
+
+# 3. Default Policy for All Other Agents
+User-agent: *
+Allow: /
+Disallow: /admin-stats.html
+Disallow: /admin_stats.html
+
+# 4. Sitemap Location
+Sitemap: https://focus.consultways.com/sitemap.xml
