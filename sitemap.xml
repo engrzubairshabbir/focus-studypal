@@ -1,61 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-    <!-- Primary Landing Domain -->
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd
+        http://www.google.com/schemas/sitemap-image/1.1
+        http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd
+        http://www.google.com/schemas/sitemap-video/1.1
+        http://www.google.com/schemas/sitemap-video/1.1/sitemap-video.xsd">
+
+    <!-- 1. Primary Landing Page (Ultra-Pro High-Tier Index Endpoint) -->
     <url>
         <loc>https://focus.consultways.com/</loc>
-        <lastmod>2026-10-29</lastmod>
+        <lastmod>2026-10-30</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
+        <!-- Rich Image Extension for Google Image Search -->
+        <image:image>
+            <image:loc>https://focus.consultways.com/thumbnail.jpg</image:loc>
+            <image:title>StudyPal Focus Sanctuary Android App — Best App to Block Reels &amp; Offline Parental Control</image:title>
+            <image:caption>Hardware-level distraction shield, dopamine detox virtual focus pets, and WhatsApp-style QR code parental control</image:caption>
+        </image:image>
+        <!-- Rich Video Extension for Live Showcase Demonstration -->
+        <video:video>
+            <video:thumbnail_loc>https://focus.consultways.com/thumbnail.jpg</video:thumbnail_loc>
+            <video:title>StudyPal Android Focus Sanctuary Live App Demo</video:title>
+            <video:description>Watch how StudyPal blocks reels and shorts, nurtures virtual focus pets, and empowers parents with zero-cloud local Wi-Fi QR code controls.</video:description>
+            <video:player_loc>https://www.youtube-nocookie.com/embed/__iiSSwFOuY</video:player_loc>
+        </video:video>
     </url>
-    <!-- Direct Download Anchor -->
+
+    <!-- 2. Direct APK Download & Verified Sideload Cluster -->
     <url>
         <loc>https://focus.consultways.com/#download</loc>
-        <lastmod>2026-10-29</lastmod>
+        <lastmod>2026-10-30</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
-    <!-- Dopamine Rehab & Reel Addiction Detangler -->
+
+    <!-- 3. Dopamine Rehab & Reel Addiction Detangler Article Cluster -->
     <url>
         <loc>https://focus.consultways.com/#dopamine-rehab</loc>
-        <lastmod>2026-10-29</lastmod>
+        <lastmod>2026-10-30</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
-    <!-- Zero-Internet Local LAN Parental Monitor -->
+
+    <!-- 4. Zero-Internet Local LAN Parental Monitor with WhatsApp-Style QR Pairing -->
     <url>
         <loc>https://focus.consultways.com/#parental-control</loc>
-        <lastmod>2026-10-29</lastmod>
+        <lastmod>2026-10-30</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
-    <!-- Cognitive Science of Deep Work & ADHD -->
+
+    <!-- 5. Cognitive Science of Deep Work, ADHD & Hardware Study Lock Article Cluster -->
     <url>
         <loc>https://focus.consultways.com/#science-of-focus</loc>
-        <lastmod>2026-10-29</lastmod>
+        <lastmod>2026-10-30</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
-    <!-- Verified Sideload Installation Walkthrough -->
+
+    <!-- 6. Multi-Brand Sideload Installation Guide (Samsung, Pixel, Motorola, Xiaomi) -->
     <url>
         <loc>https://focus.consultways.com/#install-guide</loc>
-        <lastmod>2026-10-29</lastmod>
+        <lastmod>2026-10-30</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
-    <!-- Polar Transparent Sponsorship & Orphan Education Mission -->
+
+    <!-- 7. Empathetic Support Mission & 3 Polar Contribution Tiers ($5, $12, $25) -->
     <url>
         <loc>https://focus.consultways.com/#support-mission</loc>
-        <lastmod>2026-10-29</lastmod>
+        <lastmod>2026-10-30</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
-    <!-- High-Intent Voice & Generative AI FAQ -->
+
+    <!-- 8. Comprehensive Voice & Generative AI Search FAQ Cluster (10 Targeted Q&As) -->
     <url>
         <loc>https://focus.consultways.com/#faq</loc>
-        <lastmod>2026-10-29</lastmod>
+        <lastmod>2026-10-30</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
