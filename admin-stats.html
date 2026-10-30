@@ -14,8 +14,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <!-- Chart.js via CDN for instant high-performance visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
     <style>
         :root {
@@ -693,19 +691,14 @@
             </div>
 
             <div class="dash-controls">
-                <div class="date-pills">
-                    <button class="date-pill" onclick="switchFilter('today', this)">Today</button>
-                    <button class="date-pill active" onclick="switchFilter('yesterday', this)">Yesterday (Oct 27)</button>
-                    <button class="date-pill" onclick="switchFilter('week', this)">Last 7 Days</button>
-                    <button class="date-pill" onclick="switchFilter('month', this)">Last 30 Days</button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="live-pulse-badge" style="background: rgba(37, 99, 235, 0.15); border-color: rgba(59, 130, 246, 0.4); color: #60A5FA;">
+                        <span class="pulse-dot" style="background: #3B82F6;"></span> GA4 Real-Time: G-Q315VNV99G
+                    </span>
                 </div>
 
-                <button class="btn-ctrl" onclick="toggleLookerEmbed()">
-                    <span>📊</span> <span id="lookerToggleText">Hide Looker</span>
-                </button>
-
-                <button class="btn-ctrl" onclick="exportDataJson()">
-                    <span>💾</span> Export
+                <button class="btn-ctrl" onclick="refreshLooker()">
+                    <span>🔄</span> Refresh Telemetry
                 </button>
 
                 <button class="btn-ctrl btn-logout" onclick="lockPortal()">
@@ -714,217 +707,26 @@
             </div>
         </header>
 
-        <!-- KPI Summary Cards -->
-        <div class="kpi-grid">
-            <!-- Card 1: Visitors -->
-            <div class="kpi-card">
-                <div class="kpi-head">
-                    <span class="kpi-label">Website Visitors (Ad Clicks)</span>
-                    <span class="kpi-icon">🌐</span>
-                </div>
-                <div class="kpi-value" id="kpiVisitors">
-                    173 <span style="font-size: 14px; font-weight: 500; color: var(--primary-light);">+100% Mobile</span>
-                </div>
-                <div class="kpi-meta">
-                    <strong>4,495</strong> Ad Impressions • <strong>3.85% CTR</strong><br>
-                    Avg CPC: <span class="mono">PKR 4.01</span> • Spent: <span class="mono">PKR 693.23</span>
-                </div>
-            </div>
-
-            <!-- Card 2: APK Downloads -->
-            <div class="kpi-card kpi-cyan">
-                <div class="kpi-head">
-                    <span class="kpi-label">APK Download Clicks</span>
-                    <span class="kpi-icon">📥</span>
-                </div>
-                <div class="kpi-value" id="kpiDownloads">
-                    68 <span style="font-size: 14px; font-weight: 500; color: var(--accent-cyan);" id="kpiDlRate">39.3% Rate</span>
-                </div>
-                <div class="kpi-meta">
-                    Target: <span class="mono">StudyPal-release.apk (13.8MB)</span><br>
-                    Hero CTA: <strong>48</strong> • Sticky Bar: <strong>14</strong> • Nav: <strong>6</strong>
-                </div>
-            </div>
-
-            <!-- Card 3: Active Installed Phones -->
-            <div class="kpi-card kpi-gold">
-                <div class="kpi-head">
-                    <span class="kpi-label">Active Installed Devices</span>
-                    <span class="kpi-icon">📱</span>
-                </div>
-                <div class="kpi-value" id="kpiActivePhones">
-                    42 <span style="font-size: 14px; font-weight: 500; color: var(--accent-gold);">DAU Active</span>
-                </div>
-                <div class="kpi-meta">
-                    Trial in progress (Day 1 - 30)<br>
-                    Est. Install-to-Active Ratio: <strong class="kpi-tag-good">61.7%</strong>
-                </div>
-            </div>
-
-            <!-- Card 4: Trial Expired vs Paid -->
-            <div class="kpi-card kpi-red">
-                <div class="kpi-head">
-                    <span class="kpi-label">Trial Expired vs Paid VIP</span>
-                    <span class="kpi-icon">💎</span>
-                </div>
-                <div class="kpi-value" id="kpiConversions">
-                    18 / 7 <span style="font-size: 14px; font-weight: 500; color: var(--accent-gold);">28.0% Conv</span>
-                </div>
-                <div class="kpi-meta">
-                    <strong>18</strong> Expired Locked • <strong>7</strong> Polar VIP Scholars<br>
-                    Gross Polar Revenue: <strong style="color: var(--accent-gold);">$64.93 USD</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row -->
-        <div class="charts-grid">
-            <!-- Full Funnel Chart -->
-            <div class="chart-box">
-                <div class="chart-header">
-                    <h3 class="chart-title"><span>📉</span> Full Funnel Conversion Stream</h3>
-                    <span style="font-size: 12px; color: var(--text-dim);">Google Ads ➔ Web ➔ APK ➔ Trial ➔ Paid</span>
-                </div>
-                <div class="chart-canvas-wrap">
-                    <canvas id="funnelChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Country Split Doughnut -->
-            <div class="chart-box">
-                <div class="chart-header">
-                    <h3 class="chart-title"><span>🌍</span> Country Origin Split</h3>
-                    <span style="font-size: 12px; color: var(--text-dim);" id="topCountryLabel">Pakistan (82%)</span>
-                </div>
-                <div class="chart-canvas-wrap">
-                    <canvas id="countryChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Looker Studio Dynamic Embed Box -->
+        <!-- PRIMARY HERO DASHBOARD: Google Looker Studio Real-Time Telemetry -->
         <div class="looker-container" id="lookerSection" style="display: block; margin-bottom: 24px;">
             <div class="looker-toolbar">
-                <h3 class="chart-title"><span>📊</span> Google Looker Studio Live Real-Time Telemetry</h3>
+                <div>
+                    <h3 class="chart-title"><span>📊</span> Google Analytics 4 &amp; Google Ads Live Real-Time Telemetry</h3>
+                    <div style="font-size: 12px; color: var(--text-dim); margin-top: 3px;">
+                        100% Live data synced directly from Google Analytics 4 (<span class="mono" style="color: var(--primary-light);">Property: consult-ways / G-Q315VNV99G</span>). Reflects actual website visits, ad clicks, and download actions.
+                    </div>
+                </div>
                 <div class="looker-input-group">
-                    <input type="text" id="lookerUrlInput" class="looker-input" value="https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG" placeholder="Paste your Looker Studio embed URL (https://lookerstudio.google.com/embed/reporting/...)">
-                    <button class="btn-ctrl" onclick="saveLookerUrl()">Update Report</button>
+                    <button class="btn-ctrl" onclick="refreshLooker()" style="background: var(--surface-3); border-color: var(--primary-light);">
+                        <span>🔄</span> Sync Data
+                    </button>
+                    <input type="text" id="lookerUrlInput" class="looker-input" value="https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG" style="display: none;">
                 </div>
             </div>
-            <div class="looker-iframe-wrapper">
-                <iframe id="lookerFrame" src="https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG" frameborder="0" style="border:0" allowfullscreen sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-                <div class="looker-placeholder" id="lookerPlaceholder" style="display: none;">
-                    <div style="font-size: 40px; margin-bottom: 12px;">📊</div>
-                    <h4 style="color: #fff; margin-bottom: 6px;">No Looker Studio URL Linked Yet</h4>
-                    <p style="max-width: 460px; font-size: 13px; line-height: 1.6;">
-                        Connect your free Google Looker Studio dashboard using the input bar above. Once saved, your live Google Ads + GA4 + Firebase reports will embed right here.
-                    </p>
-                </div>
+            <div class="looker-iframe-wrapper" style="height: 750px;">
+                <iframe id="lookerFrame" src="https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG" frameborder="0" style="border:0; width:100%; height:100%;" allowfullscreen sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
             </div>
         </div>
-
-        <!-- Breakdown Tables -->
-        <div class="data-tables-grid">
-            <!-- Country Performance Table -->
-            <div class="chart-box">
-                <div class="chart-header">
-                    <h3 class="chart-title"><span>🗺️</span> Regional Performance Breakdown</h3>
-                    <span class="mono" style="font-size: 12px; color: var(--text-dim);">Google Ads Target</span>
-                </div>
-                <table class="custom-table">
-                    <thead>
-                        <tr>
-                            <th>Country</th>
-                            <th>Visitors</th>
-                            <th>Downloads</th>
-                            <th>Active App</th>
-                            <th>Paid VIP</th>
-                        </tr>
-                    </thead>
-                    <tbody id="countryTableBody">
-                        <tr>
-                            <td><span class="country-flag">🇵🇰</span> Pakistan</td>
-                            <td>142 (82%)</td>
-                            <td>56</td>
-                            <td>35</td>
-                            <td>4</td>
-                        </tr>
-                        <tr>
-                            <td><span class="country-flag">🇺🇸</span> United States</td>
-                            <td>16 (9%)</td>
-                            <td>7</td>
-                            <td>4</td>
-                            <td>2</td>
-                        </tr>
-                        <tr>
-                            <td><span class="country-flag">🇦🇪</span> UAE</td>
-                            <td>9 (5%)</td>
-                            <td>3</td>
-                            <td>2</td>
-                            <td>1</td>
-                        </tr>
-                        <tr>
-                            <td><span class="country-flag">🇬🇧</span> United Kingdom</td>
-                            <td>6 (4%)</td>
-                            <td>2</td>
-                            <td>1</td>
-                            <td>0</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Real-Time Activity Feed -->
-            <div class="stream-box">
-                <div class="chart-header">
-                    <h3 class="chart-title"><span>⚡</span> Live Device Telemetry Feed</h3>
-                    <span style="font-size: 11px; color: var(--primary-light);">● Listening via GA4 & Firebase</span>
-                </div>
-                <div id="activityFeed">
-                    <div class="stream-item">
-                        <div>
-                            <strong>Paid Subscription Completed</strong><br>
-                            <span style="font-size: 11px; color: var(--text-dim);">Polar.sh Deep Link • Lifetime Pass ($10.00)</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <span class="stream-tag tag-paid">PAID VIP</span><br>
-                            <small class="mono" style="color: var(--text-dim);">14m ago • US</small>
-                        </div>
-                    </div>
-
-                    <div class="stream-item">
-                        <div>
-                            <strong>APK Download Completed</strong><br>
-                            <span style="font-size: 11px; color: var(--text-dim);">Direct APK • StudyPal-release.apk (13.8MB)</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <span class="stream-tag tag-download">DOWNLOAD</span><br>
-                            <small class="mono" style="color: var(--text-dim);">26m ago • PK</small>
-                        </div>
-                    </div>
-
-                    <div class="stream-item">
-                        <div>
-                            <strong>Daily Active Study Session</strong><br>
-                            <span style="font-size: 11px; color: var(--text-dim);">Device #38a7c4 • Day 26 of 30 remaining</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <span class="stream-tag tag-active">ACTIVE APP</span><br>
-                            <small class="mono" style="color: var(--text-dim);">41m ago • PK</small>
-                        </div>
-                    </div>
-
-                    <div class="stream-item">
-                        <div>
-                            <strong>30-Day Free Trial Expired</strong><br>
-                            <span style="font-size: 11px; color: var(--text-dim);">Day 31 Lock Screen Rendered • Device #9b41ef</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <span class="stream-tag tag-expired">EXPIRED LOCK</span><br>
-                            <small class="mono" style="color: var(--text-dim);">1h ago • AE</small>
-                        </div>
-                    </div>
-                </div>
 
         <!-- FIREBASE CLOUD SYNC HEALTH & STATUS BANNER -->
         <div id="firebaseHealthCard" style="background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px;">
@@ -1049,8 +851,6 @@
         // MASTER PIN CONFIGURATION (Default: 3609)
         const MASTER_PIN = "3609";
         let enteredPin = "";
-        let funnelChartInstance = null;
-        let countryChartInstance = null;
 
         function showToast(message, icon = "ℹ️") {
             const toast = document.getElementById('toast');
@@ -1066,51 +866,7 @@
             }, 3500);
         }
 
-        // Dataset presets
-        const TELEMETRY_DATA = {
-            yesterday: {
-                visitors: 173,
-                downloads: 68,
-                activePhones: 42,
-                expired: 18,
-                paid: 7,
-                volume: "$64.93",
-                countries: [142, 16, 9, 6],
-                funnel: [173, 68, 42, 18, 7]
-            },
-            today: {
-                visitors: 124,
-                downloads: 49,
-                activePhones: 31,
-                expired: 12,
-                paid: 5,
-                volume: "$45.00",
-                countries: [102, 12, 6, 4],
-                funnel: [124, 49, 31, 12, 5]
-            },
-            week: {
-                visitors: 980,
-                downloads: 382,
-                activePhones: 245,
-                expired: 96,
-                paid: 38,
-                volume: "$360.50",
-                countries: [780, 110, 52, 38],
-                funnel: [980, 382, 245, 96, 38]
-            },
-            month: {
-                visitors: 3850,
-                downloads: 1490,
-                activePhones: 960,
-                expired: 340,
-                paid: 142,
-                volume: "$1,380.00",
-                countries: [3050, 420, 210, 170],
-                funnel: [3850, 1490, 960, 340, 142]
-            }
-        };
-
-        // Check if session already authenticated
+        // Check if session already authenticated & initialize dashboard
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('sp_admin_authenticated') === 'true') {
                 unlockPortal(false);
@@ -1119,13 +875,15 @@
             // Load saved Looker Studio URL (Permanent default from project setup)
             const PERMANENT_LOOKER_URL = "https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG";
             const savedUrl = localStorage.getItem('sp_looker_studio_url') || PERMANENT_LOOKER_URL;
-            if (savedUrl) {
-                document.getElementById('lookerUrlInput').value = savedUrl;
-                document.getElementById('lookerFrame').src = savedUrl;
-                document.getElementById('lookerPlaceholder').style.display = 'none';
-            }
+            const input = document.getElementById('lookerUrlInput');
+            const frame = document.getElementById('lookerFrame');
+            if (input) input.value = savedUrl;
+            if (frame && !frame.src) frame.src = savedUrl;
 
-            initCharts(TELEMETRY_DATA.yesterday);
+            // Ping Firebase and load claims & feedback
+            pingFirebaseDb();
+            loadPaymentClaims();
+            loadFeedbackTickets();
         });
 
         // Keyboard support for PIN entry
@@ -1160,16 +918,19 @@
         function clearPin() {
             enteredPin = "";
             updateDots();
-            document.getElementById('pinError').innerText = "";
+            const errEl = document.getElementById('pinError');
+            if (errEl) errEl.innerText = "";
         }
 
         function updateDots() {
             for (let i = 0; i < 4; i++) {
                 const dot = document.getElementById('dot' + i);
-                if (i < enteredPin.length) {
-                    dot.classList.add('filled');
-                } else {
-                    dot.classList.remove('filled');
+                if (dot) {
+                    if (i < enteredPin.length) {
+                        dot.classList.add('filled');
+                    } else {
+                        dot.classList.remove('filled');
+                    }
                 }
             }
         }
@@ -1180,188 +941,64 @@
 
             if (enteredPin === MASTER_PIN) {
                 sessionStorage.setItem('sp_admin_authenticated', 'true');
-                errEl.innerText = "";
+                if (errEl) errEl.innerText = "";
                 showToast("Access Granted • Welcome Maryam Fatima", "✨");
                 unlockPortal(true);
             } else {
-                errEl.innerText = "Invalid PIN. Access Denied.";
-                cardEl.classList.add('shake');
-                setTimeout(() => {
-                    cardEl.classList.remove('shake');
-                    clearPin();
-                }, 450);
+                if (errEl) errEl.innerText = "Invalid PIN. Access Denied.";
+                if (cardEl) {
+                    cardEl.classList.add('shake');
+                    setTimeout(() => {
+                        cardEl.classList.remove('shake');
+                        clearPin();
+                    }, 450);
+                }
             }
         }
 
         function unlockPortal(animate) {
             const overlay = document.getElementById('pinModalOverlay');
-            overlay.classList.add('unlocked');
+            if (overlay) overlay.classList.add('unlocked');
         }
 
         function lockPortal() {
             sessionStorage.removeItem('sp_admin_authenticated');
             clearPin();
-            document.getElementById('pinModalOverlay').classList.remove('unlocked');
+            const overlay = document.getElementById('pinModalOverlay');
+            if (overlay) overlay.classList.remove('unlocked');
             showToast("Portal Locked", "🔒");
         }
 
-        // Filter Switcher
-        function switchFilter(key, btn) {
-            document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-
-            const data = TELEMETRY_DATA[key];
-            if (!data) return;
-
-            document.getElementById('kpiVisitors').innerHTML = `${data.visitors} <span style="font-size: 14px; font-weight: 500; color: var(--primary-light);">+100% Mobile</span>`;
-            document.getElementById('kpiDownloads').innerHTML = `${data.downloads} <span style="font-size: 14px; font-weight: 500; color: var(--accent-cyan);">${((data.downloads/data.visitors)*100).toFixed(1)}% Rate</span>`;
-            document.getElementById('kpiActivePhones').innerHTML = `${data.activePhones} <span style="font-size: 14px; font-weight: 500; color: var(--accent-gold);">DAU Active</span>`;
-            document.getElementById('kpiConversions').innerHTML = `${data.expired} / ${data.paid} <span style="font-size: 14px; font-weight: 500; color: var(--accent-gold);">${((data.paid/data.expired)*100).toFixed(1)}% Conv</span>`;
-
-            updateCharts(data);
-            showToast(`Data refreshed for ${btn.innerText}`, "📈");
-        }
-
-        // Charts Initialization
-        function initCharts(initialData) {
-            // 1. Funnel Bar Chart
-            const ctxFunnel = document.getElementById('funnelChart').getContext('2d');
-            funnelChartInstance = new Chart(ctxFunnel, {
-                type: 'bar',
-                data: {
-                    labels: ['1. Website Visitors', '2. APK Download Clicks', '3. Active Devices', '4. Trial Expired Locked', '5. Paid VIP Scholars'],
-                    datasets: [{
-                        label: 'Funnel Counts',
-                        data: initialData.funnel,
-                        backgroundColor: [
-                            'rgba(76, 175, 80, 0.75)',
-                            'rgba(0, 229, 255, 0.75)',
-                            'rgba(255, 193, 7, 0.75)',
-                            'rgba(255, 82, 82, 0.75)',
-                            'rgba(156, 39, 176, 0.75)'
-                        ],
-                        borderColor: [
-                            '#4CAF50',
-                            '#00E5FF',
-                            '#FFC107',
-                            '#FF5252',
-                            '#BA68C8'
-                        ],
-                        borderWidth: 1.5,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 18, 0.95)',
-                            borderColor: 'rgba(76, 175, 80, 0.4)',
-                            borderWidth: 1,
-                            padding: 12
-                        }
-                    },
-                    scales: {
-                        y: {
-                            grid: { color: 'rgba(255, 255, 255, 0.06)' },
-                            ticks: { color: '#A3BCA7', font: { family: 'JetBrains Mono' } }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#fff', font: { size: 11 } }
-                        }
-                    }
-                }
-            });
-
-            // 2. Country Doughnut Chart
-            const ctxCountry = document.getElementById('countryChart').getContext('2d');
-            countryChartInstance = new Chart(ctxCountry, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Pakistan', 'United States', 'UAE', 'United Kingdom'],
-                    datasets: [{
-                        data: initialData.countries,
-                        backgroundColor: [
-                            '#2E7D32',
-                            '#00B0FF',
-                            '#FFB300',
-                            '#7E57C2'
-                        ],
-                        borderColor: '#0F1712',
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: '#A3BCA7', font: { size: 12 } }
-                        }
-                    },
-                    cutout: '65%'
-                }
-            });
-        }
-
-        function updateCharts(data) {
-            if (funnelChartInstance) {
-                funnelChartInstance.data.datasets[0].data = data.funnel;
-                funnelChartInstance.update();
-            }
-            if (countryChartInstance) {
-                countryChartInstance.data.datasets[0].data = data.countries;
-                countryChartInstance.update();
-            }
-        }
-
-        // Looker Studio Embed Toggle & Save
-        function toggleLookerEmbed() {
-            const sec = document.getElementById('lookerSection');
-            const txt = document.getElementById('lookerToggleText');
-            if (sec.style.display === 'none') {
-                sec.style.display = 'block';
-                txt.innerText = 'Hide Looker';
-                sec.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                sec.style.display = 'none';
-                txt.innerText = 'Show Looker';
+        // Live Looker Studio Refresh & URL management
+        function refreshLooker() {
+            const frame = document.getElementById('lookerFrame');
+            if (frame) {
+                const currentSrc = frame.src;
+                frame.src = '';
+                setTimeout(() => {
+                    frame.src = currentSrc;
+                }, 100);
+                showToast("Refreshing Live GA4 & Ads Report...", "🔄");
             }
         }
 
         function saveLookerUrl() {
-            let url = document.getElementById('lookerUrlInput').value.trim();
+            const input = document.getElementById('lookerUrlInput');
+            if (!input) return;
+            let url = input.value.trim();
             if (!url) {
                 showToast("Please paste a valid URL", "⚠️");
                 return;
             }
-            // Auto-extract URL if user pastes the full <iframe src="..."> embed snippet
             const iframeMatch = url.match(/src=["']([^"']+)["']/i);
             if (iframeMatch) {
                 url = iframeMatch[1];
             }
             localStorage.setItem('sp_looker_studio_url', url);
-            document.getElementById('lookerUrlInput').value = url;
-            document.getElementById('lookerFrame').src = url;
-            document.getElementById('lookerPlaceholder').style.display = 'none';
+            input.value = url;
+            const frame = document.getElementById('lookerFrame');
+            if (frame) frame.src = url;
             showToast("Looker Studio Report Connected!", "✅");
-        }
-
-        // Export JSON Data
-        function exportDataJson() {
-            const activeFilter = document.querySelector('.date-pill.active').innerText;
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(TELEMETRY_DATA, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `studypal_telemetry_${Date.now()}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("Telemetry snapshot downloaded", "💾");
         }
 
         // --- Cloud Payment Claims & Remote Device Activation Logic ---
