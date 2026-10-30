@@ -547,12 +547,25 @@
 
         .looker-iframe-wrapper {
             width: 100%;
-            height: 600px;
+            height: 420px;
             border-radius: 12px;
             overflow: hidden;
             border: 1px solid var(--border);
             background: var(--surface-1);
             position: relative;
+            transition: height 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .looker-iframe-wrapper {
+                height: 195px !important;
+            }
+            .looker-iframe-wrapper.expanded {
+                height: 420px !important;
+            }
+            .looker-container {
+                padding: 16px 12px;
+            }
         }
 
         .looker-iframe-wrapper iframe {
@@ -726,7 +739,7 @@
                     <input type="text" id="lookerUrlInput" class="looker-input" value="https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG" style="display: none;">
                 </div>
             </div>
-            <div class="looker-iframe-wrapper" id="lookerIframeWrapper" style="height: 420px; transition: height 0.3s ease;">
+            <div class="looker-iframe-wrapper" id="lookerIframeWrapper">
                 <iframe id="lookerFrame" src="https://datastudio.google.com/embed/reporting/af389269-f3e5-4bbe-b64a-31a77aad056e/page/EoRCG" frameborder="0" style="border:0; width:100%; height:100%;" allowfullscreen sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
             </div>
         </div>
@@ -972,6 +985,10 @@
             // Initialize Multi-Period Date Filter with Today's Data
             selectDatePreset('today');
 
+            // Responsive Looker canvas adjustment for mobile
+            updateResponsiveCanvasLabel();
+            window.addEventListener('resize', updateResponsiveCanvasLabel);
+
             // Ping Firebase and load live claims, activations, and feedback
             pingFirebaseDb();
             loadPaymentClaims();
@@ -1063,18 +1080,32 @@
         }
 
         // --- Looker Studio Canvas Height & Controls ---
+        function updateResponsiveCanvasLabel() {
+            const text = document.getElementById('canvasHeightText');
+            const wrapper = document.getElementById('lookerIframeWrapper');
+            if (!text || !wrapper) return;
+            const isMobile = window.innerWidth <= 768;
+            if (!wrapper.classList.contains('expanded')) {
+                text.innerText = isMobile ? 'Compact View' : 'Compact (420px)';
+            }
+        }
+
         function toggleLookerCanvasHeight() {
             const wrapper = document.getElementById('lookerIframeWrapper');
             const text = document.getElementById('canvasHeightText');
             if (!wrapper) return;
-            if (wrapper.style.height === '420px' || !wrapper.style.height) {
-                wrapper.style.height = '750px';
-                if (text) text.innerText = 'Full Height (750px)';
-                showToast("Looker Canvas Expanded", "⛶");
+            const isMobile = window.innerWidth <= 768;
+
+            if (wrapper.classList.contains('expanded')) {
+                wrapper.classList.remove('expanded');
+                wrapper.style.height = '';
+                if (text) text.innerText = isMobile ? 'Compact View' : 'Compact (420px)';
+                showToast("Switched to Compact View", "⊟");
             } else {
-                wrapper.style.height = '420px';
-                if (text) text.innerText = 'Compact (420px)';
-                showToast("Switched to Compact Canvas", "⊟");
+                wrapper.classList.add('expanded');
+                wrapper.style.height = isMobile ? '420px' : '750px';
+                if (text) text.innerText = isMobile ? 'Full View (420px)' : 'Full Height (750px)';
+                showToast("Looker Canvas Expanded", "⛶");
             }
         }
 
